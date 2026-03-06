@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Build
+*.tsbuildinfo
+next-env.d.ts
+
+# Env and secrets
+.env
+.env.local
+.env.*.local
+
+# Local DB (optional: remove this line if you want to commit seed data)
+data/db.json
+
+# IDE
+.vscode/
+.idea/
+
+# Nested repo (legacy)
+poopstar/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (user-generated)
+public/uploads/
