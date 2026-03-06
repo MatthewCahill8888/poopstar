@@ -5,6 +5,16 @@ import { hashSync } from "bcryptjs";
 
 import { DB_PATH } from "@/lib/constants";
 import { distanceKm } from "@/lib/geo";
+
+const IS_VERCEL = process.env.VERCEL === "1";
+let memoryDb: Database | null = null;
+
+function getMemoryDb(): Database {
+  if (!memoryDb) {
+    memoryDb = createSeedDatabase();
+  }
+  return memoryDb;
+}
 import type {
   Database,
   PoopPost,
@@ -164,12 +174,16 @@ function createSeedDatabase(): Database {
 }
 
 export function readDb(): Database {
+  if (IS_VERCEL) {
+    return getMemoryDb();
+  }
   ensureDbFile();
   const raw = fs.readFileSync(DB_PATH, "utf8");
   return JSON.parse(raw) as Database;
 }
 
 function writeDb(db: Database): void {
+  if (IS_VERCEL) return; // no-op; in-memory only on Vercel
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), "utf8");
 }
 

@@ -61,7 +61,13 @@ export function PostComposer() {
         body: form,
         credentials: "include",
       });
-      const uploadData = (await uploadRes.json()) as { url?: string; error?: string };
+      const uploadText = await uploadRes.text();
+      let uploadData: { url?: string; error?: string } = {};
+      try {
+        uploadData = uploadText ? JSON.parse(uploadText) : {};
+      } catch {
+        throw new Error(uploadRes.ok ? "Invalid response" : `Upload failed (${uploadRes.status}).`);
+      }
       if (!uploadRes.ok || !uploadData.url) {
         throw new Error(uploadData.error ?? "Upload failed.");
       }

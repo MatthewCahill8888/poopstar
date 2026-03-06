@@ -99,3 +99,14 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and allow location access when prompted.
+
+---
+
+## Deploy on Vercel (website)
+
+1. Push the repo to GitHub.
+2. Go to [vercel.com](https://vercel.com) → **Add New…** → **Project** → import your `poopstar` repo.
+3. Add an **Environment Variable**: `AUTH_SECRET` = a long random string (e.g. run `openssl rand -base64 32` and paste the result).
+4. Click **Deploy**. Vercel will build and host the site.
+
+**Note:** The app uses a local JSON file for data. On Vercel the filesystem is read-only, so registrations and posts won’t persist. For a production site you’d connect a database (e.g. Vercel Postgres, Supabase). See [docs/VERCEL.md](docs/VERCEL.md) for full steps and details.
