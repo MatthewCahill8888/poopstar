@@ -16,15 +16,22 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   } catch {
     return unauthorized();
   }
-  const formData = await req.formData();
-  const file = formData.get("file");
-  if (!(file instanceof File)) {
-    return NextResponse.json({ error: "Missing file." }, { status: 400 });
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file");
+    if (!(file instanceof File)) {
+      return NextResponse.json({ error: "Missing file." }, { status: 400 });
+    }
+    const ext = file.type.includes("png") ? "png" : "jpg";
+    const filename = `${crypto.randomUUID()}.${ext}`;
+    const dir = path.join(process.cwd(), "public", "uploads");
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, filename), await toBuffer(file));
+    return NextResponse.json({ url: `/uploads/${filename}` });
+  } catch {
+    return NextResponse.json(
+      { error: "Upload unavailable on this deployment (storage is read-only)." },
+      { status: 503 },
+    );
   }
-  const ext = file.type.includes("png") ? "png" : "jpg";
-  const filename = `${crypto.randomUUID()}.${ext}`;
-  const dir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, filename), await toBuffer(file));
-  return NextResponse.json({ url: `/uploads/${filename}` });
 }

@@ -11,23 +11,30 @@ import {
 import { parseCoordinate } from "@/lib/geo";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  let viewerId: string | undefined;
   try {
-    const user = await requireUser(req);
-    viewerId = user.id;
+    let viewerId: string | undefined;
+    try {
+      const user = await requireUser(req);
+      viewerId = user.id;
+    } catch {
+      // Public read allowed for browsing; no likedByMe metadata.
+    }
+
+    const lat = parseCoordinate(req.nextUrl.searchParams.get("lat"));
+    const lng = parseCoordinate(req.nextUrl.searchParams.get("lng"));
+    const radius =
+      Number(req.nextUrl.searchParams.get("radiusKm")) || DEFAULT_NEARBY_RADIUS_KM;
+
+    const posts = getPostsWithMeta(viewerId, lat, lng);
+    const payload =
+      lat !== undefined && lng !== undefined ? toRadiusPosts(posts, radius) : posts;
+    return NextResponse.json({ posts: payload });
   } catch {
-    // Public read allowed for browsing; no likedByMe metadata.
+    return NextResponse.json(
+      { error: "Failed to load feed." },
+      { status: 500 },
+    );
   }
-
-  const lat = parseCoordinate(req.nextUrl.searchParams.get("lat"));
-  const lng = parseCoordinate(req.nextUrl.searchParams.get("lng"));
-  const radius =
-    Number(req.nextUrl.searchParams.get("radiusKm")) || DEFAULT_NEARBY_RADIUS_KM;
-
-  const posts = getPostsWithMeta(viewerId, lat, lng);
-  const payload =
-    lat !== undefined && lng !== undefined ? toRadiusPosts(posts, radius) : posts;
-  return NextResponse.json({ posts: payload });
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {

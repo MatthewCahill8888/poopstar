@@ -110,3 +110,5 @@ Open [http://localhost:3000](http://localhost:3000) and allow location access wh
 4. Click **Deploy**. Vercel will build and host the site.
 
 **Note:** The app uses a local JSON file for data. On Vercel the filesystem is read-only, so registrations and posts won’t persist. For a production site you’d connect a database (e.g. Vercel Postgres, Supabase). See [docs/VERCEL.md](docs/VERCEL.md) for full steps and details.
+
+If you see **"Unexpected end of JSON input"** on the deployed site, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
