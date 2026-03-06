@@ -20,12 +20,13 @@ Make sure your repo is on GitHub (e.g. `https://github.com/MatthewCahill8888/poo
 
 Before deploying, add:
 
-| Name           | Value              | Notes |
-|----------------|--------------------|--------|
-| `AUTH_SECRET`  | (long random string) | Used to sign session cookies. Generate one with: `openssl rand -base64 32` |
+| Name                   | Value                 | Notes |
+|------------------------|-----------------------|--------|
+| `AUTH_SECRET`          | (long random string)  | Used to sign session cookies. Generate with: `openssl rand -base64 32` |
+| `REPLICATE_API_TOKEN`  | (optional)            | For real cartoon generation. Get a token at [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens); new accounts get free credits. Without it, the app shows a placeholder image instead of AI cartoon. |
 
 1. In the import screen, open **Environment Variables**.
-2. Add `AUTH_SECRET` and paste a long random string (e.g. from `openssl rand -base64 32`).
+2. Add `AUTH_SECRET` (required) and optionally `REPLICATE_API_TOKEN`.
 3. Click **Deploy**.
 
 ## 4. After deploy

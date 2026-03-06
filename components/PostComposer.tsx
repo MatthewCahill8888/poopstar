@@ -17,6 +17,13 @@ export function PostComposer() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    jsonFetch<{ user: unknown }>("/api/auth/me")
+      .then(() => setIsLoggedIn(true))
+      .catch(() => setIsLoggedIn(false));
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -41,6 +48,25 @@ export function PostComposer() {
     }
   }
 
+  /** Upload to a public host so the Gen AI service (Replicate) can fetch the image. */
+  async function uploadImagePublicly(): Promise<string> {
+    if (!file) throw new Error("No file.");
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("https://0x0.st", {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) {
+      throw new Error("Image upload failed. Try again.");
+    }
+    const url = (await res.text()).trim();
+    if (!url.startsWith("http")) {
+      throw new Error("Image upload failed.");
+    }
+    return url;
+  }
+
   async function onGenerateAndPost(event: FormEvent): Promise<void> {
     event.preventDefault();
     setError(null);
@@ -54,34 +80,18 @@ export function PostComposer() {
         throw new Error("Allow geolocation to post nearby.");
       }
 
-      const form = new FormData();
-      form.append("file", file);
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: form,
-        credentials: "include",
-      });
-      const uploadText = await uploadRes.text();
-      let uploadData: { url?: string; error?: string } = {};
-      try {
-        uploadData = uploadText ? JSON.parse(uploadText) : {};
-      } catch {
-        throw new Error(uploadRes.ok ? "Invalid response" : `Upload failed (${uploadRes.status}).`);
-      }
-      if (!uploadRes.ok || !uploadData.url) {
-        throw new Error(uploadData.error ?? "Upload failed.");
-      }
+      const originalImageUrl = await uploadImagePublicly();
 
       const aiData = await jsonFetch<{ cartoonUrl: string }>("/api/ai/cartoon", {
         method: "POST",
-        body: JSON.stringify({ imageUrl: uploadData.url }),
+        body: JSON.stringify({ imageUrl: originalImageUrl }),
       });
       setCartoonUrl(aiData.cartoonUrl);
 
       await jsonFetch<{ post: { id: string } }>("/api/posts", {
         method: "POST",
         body: JSON.stringify({
-          originalImageUrl: uploadData.url,
+          originalImageUrl,
           cartoonImageUrl: aiData.cartoonUrl,
           caption,
           toiletId: toiletId || undefined,
@@ -108,6 +118,11 @@ export function PostComposer() {
         Upload on the toilet, auto-pick nearby location, generate a brainrot cartoon,
         and compete for toilet ownership.
       </p>
+      {isLoggedIn === false && (
+        <p className="error-text" style={{ marginBottom: "0.5rem" }}>
+          You need to log in (top right) before you can post.
+        </p>
+      )}
       <form className="stack" onSubmit={onGenerateAndPost}>
         <input type="file" accept="image/*" onChange={onFileChange} className="input" />
         <textarea
@@ -132,7 +147,11 @@ export function PostComposer() {
             </option>
           ))}
         </select>
-        <button className="primary-btn" type="submit" disabled={pending}>
+        <button
+          className="primary-btn"
+          type="submit"
+          disabled={pending || isLoggedIn === false}
+        >
           {pending ? "Generating + posting..." : "Generate cartoon and post"}
         </button>
         {error ? <p className="error-text">{error}</p> : null}

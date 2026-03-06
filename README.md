@@ -109,6 +109,8 @@ Open [http://localhost:3000](http://localhost:3000) and allow location access wh
 3. Add an **Environment Variable**: `AUTH_SECRET` = a long random string (e.g. run `openssl rand -base64 32` and paste the result).
 4. Click **Deploy**. Vercel will build and host the site.
 
+**Cartoon Gen AI:** The post flow uses [Replicate](https://replicate.com) (model: `catacolabs/cartoonify`) to turn the uploaded photo into a cartoon. Set **`REPLICATE_API_TOKEN`** in your environment (get one at [replicate.com/account/api-tokens](https://replicate.com/account/api-tokens); new accounts get free credits). Without it, a placeholder image is used. Images are uploaded to a public host (0x0.st) so Replicate can fetch them.
+
 **Note:** The app uses a local JSON file for data. On Vercel the filesystem is read-only, so registrations and posts won’t persist. For a production site you’d connect a database (e.g. Vercel Postgres, Supabase). See [docs/VERCEL.md](docs/VERCEL.md) for full steps and details.
 
 If you see **"Unexpected end of JSON input"** on the deployed site, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).

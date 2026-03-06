@@ -107,7 +107,7 @@ function createSeedDatabase(): Database {
         authorId: user1Id,
         toiletId: toilet1Id,
         originalImageUrl: "https://placehold.co/600x600/fecaca/111111?text=Original+Poop",
-        cartoonImageUrl: "https://placehold.co/600x600/fcd34d/111111?text=Brainrot+Cartoon",
+        cartoonImageUrl: "/demo-cartoon-1.png",
         caption: "Morning masterpiece",
         lat: 51.5079,
         lng: -0.0877,
@@ -118,7 +118,7 @@ function createSeedDatabase(): Database {
         authorId: user2Id,
         toiletId: toilet2Id,
         originalImageUrl: "https://placehold.co/600x600/fbcfe8/111111?text=Original+Poop",
-        cartoonImageUrl: "https://placehold.co/600x600/fde68a/111111?text=Cartoon+Drop",
+        cartoonImageUrl: "/demo-cartoon-2.png",
         caption: "Cafe special drop",
         lat: 51.5112,
         lng: -0.0921,
@@ -173,13 +173,38 @@ function createSeedDatabase(): Database {
   };
 }
 
+const DEMO_CARTOON_1 = "/demo-cartoon-1.png";
+const DEMO_CARTOON_2 = "/demo-cartoon-2.png";
+const OLD_PLACEHOLDER_1 = "https://placehold.co/600x600/fcd34d/111111?text=Brainrot+Cartoon";
+const OLD_PLACEHOLDER_2 = "https://placehold.co/600x600/fde68a/111111?text=Cartoon+Drop";
+
+/** Migrate demo posts from placeholder URLs to real demo images. Returns true if any change was made. */
+function migrateDemoPostImages(db: Database): boolean {
+  let changed = false;
+  for (const post of db.posts) {
+    if (post.cartoonImageUrl === OLD_PLACEHOLDER_1) {
+      post.cartoonImageUrl = DEMO_CARTOON_1;
+      changed = true;
+    }
+    if (post.cartoonImageUrl === OLD_PLACEHOLDER_2) {
+      post.cartoonImageUrl = DEMO_CARTOON_2;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 export function readDb(): Database {
   if (IS_VERCEL) {
     return getMemoryDb();
   }
   ensureDbFile();
   const raw = fs.readFileSync(DB_PATH, "utf8");
-  return JSON.parse(raw) as Database;
+  const db = JSON.parse(raw) as Database;
+  if (migrateDemoPostImages(db)) {
+    writeDb(db);
+  }
+  return db;
 }
 
 function writeDb(db: Database): void {

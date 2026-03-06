@@ -32,6 +32,9 @@ export async function jsonFetch<T>(
   }
 
   if (!res.ok) {
+    if (res.status === 401) {
+      throw new Error("Please log in to post.");
+    }
     throw new Error(data.error ?? `Request failed (${res.status})`);
   }
   return data;
