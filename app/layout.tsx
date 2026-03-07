@@ -5,7 +5,7 @@ import { AuthPanel } from "@/components/AuthPanel";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Poopstar — Get popular by your poops",
+  title: "Poopstar — Be the next Poopstar",
   description: "Post brainrot cartoon poops, claim toilets, rate places. Social media for the bathroom.",
 };
 

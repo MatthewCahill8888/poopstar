@@ -53,6 +53,8 @@ function createSeedDatabase(): Database {
   const user2Id = "user_demo_zoe";
   const toilet1Id = "toilet_union";
   const toilet2Id = "toilet_cafe";
+  const toilet3Id = "toilet_duhig";
+  const toilet4Id = "toilet_aeb";
   const post1Id = "post_demo_1";
   const post2Id = "post_demo_2";
 
@@ -100,28 +102,50 @@ function createSeedDatabase(): Database {
         genderNeutral: false,
         createdAt: t,
       },
+      {
+        id: toilet3Id,
+        name: "Duhig Level 3 Male Toilets",
+        address: "Duhig Level 3",
+        lat: 51.5085,
+        lng: -0.0885,
+        openingHours: "Building hours",
+        accessibility: "Step-free access",
+        genderNeutral: false,
+        createdAt: t,
+      },
+      {
+        id: toilet4Id,
+        name: "Advanced Engineering Building Level 6 Female Toilets",
+        address: "AEB Level 6",
+        lat: 51.509,
+        lng: -0.089,
+        openingHours: "Building hours",
+        accessibility: "Step-free access",
+        genderNeutral: false,
+        createdAt: t,
+      },
     ],
     posts: [
       {
         id: post1Id,
         authorId: user1Id,
-        toiletId: toilet1Id,
+        toiletId: toilet3Id,
         originalImageUrl: "https://placehold.co/600x600/fecaca/111111?text=Original+Poop",
-        cartoonImageUrl: "/demo-cartoon-1.png",
+        cartoonImageUrl: "/feed-duhig-drum.png",
         caption: "Morning masterpiece",
-        lat: 51.5079,
-        lng: -0.0877,
+        lat: 51.5085,
+        lng: -0.0885,
         createdAt: t,
       },
       {
         id: post2Id,
         authorId: user2Id,
-        toiletId: toilet2Id,
+        toiletId: toilet4Id,
         originalImageUrl: "https://placehold.co/600x600/fbcfe8/111111?text=Original+Poop",
-        cartoonImageUrl: "/demo-cartoon-2.png",
-        caption: "Cafe special drop",
-        lat: 51.5112,
-        lng: -0.0921,
+        cartoonImageUrl: "/feed-aeb-ballerina.png",
+        caption: "Ready to make a change!",
+        lat: 51.509,
+        lng: -0.089,
         createdAt: t,
       },
     ],
@@ -173,38 +197,13 @@ function createSeedDatabase(): Database {
   };
 }
 
-const DEMO_CARTOON_1 = "/demo-cartoon-1.png";
-const DEMO_CARTOON_2 = "/demo-cartoon-2.png";
-const OLD_PLACEHOLDER_1 = "https://placehold.co/600x600/fcd34d/111111?text=Brainrot+Cartoon";
-const OLD_PLACEHOLDER_2 = "https://placehold.co/600x600/fde68a/111111?text=Cartoon+Drop";
-
-/** Migrate demo posts from placeholder URLs to real demo images. Returns true if any change was made. */
-function migrateDemoPostImages(db: Database): boolean {
-  let changed = false;
-  for (const post of db.posts) {
-    if (post.cartoonImageUrl === OLD_PLACEHOLDER_1) {
-      post.cartoonImageUrl = DEMO_CARTOON_1;
-      changed = true;
-    }
-    if (post.cartoonImageUrl === OLD_PLACEHOLDER_2) {
-      post.cartoonImageUrl = DEMO_CARTOON_2;
-      changed = true;
-    }
-  }
-  return changed;
-}
-
 export function readDb(): Database {
   if (IS_VERCEL) {
     return getMemoryDb();
   }
   ensureDbFile();
   const raw = fs.readFileSync(DB_PATH, "utf8");
-  const db = JSON.parse(raw) as Database;
-  if (migrateDemoPostImages(db)) {
-    writeDb(db);
-  }
-  return db;
+  return JSON.parse(raw) as Database;
 }
 
 function writeDb(db: Database): void {
